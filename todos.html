@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>플랜두씨 다이어리 — 할 일</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="notice-bar">
+  지금은 로그인이 없어 링크를 아는 사람은 누구나 볼 수 있습니다. 남이 봐도 괜찮은 내용만 넣으세요.
+</div>
+
+<header class="page-head">
+  <h1>할 일</h1>
+  <p class="sub">선택한 계획에 딸린 할 일을 만들고 다룹니다</p>
+</header>
+
+<nav class="nav-bar">
+  <a href="index.html">계획</a>
+  <a href="todos.html" class="active">할 일</a>
+  <a href="logs.html">실행 기록</a>
+  <a href="review.html">돌아보기</a>
+  <a href="export.html">내보내기</a>
+</nav>
+
+<div class="plan-badge" id="plan-badge"></div>
+
+<main>
+  <section class="card" id="section-todos">
+    <form id="todo-form" class="form-grid">
+      <input type="hidden" id="todo-edit-id" />
+      <label>제목 <input type="text" id="todo-title" required /></label>
+      <label>마감일 <input type="date" id="todo-due" /></label>
+      <label>우선순위
+        <select id="todo-priority">
+          <option value="높음">높음</option>
+          <option value="중간" selected>중간</option>
+          <option value="낮음">낮음</option>
+        </select>
+      </label>
+      <label>태그(쉼표로 구분) <input type="text" id="todo-tags" placeholder="예: 운동,아침" /></label>
+      <label>예상 시간(분) <input type="number" id="todo-estimate" min="0" required /></label>
+      <div class="form-actions">
+        <button type="submit" id="todo-submit-btn">할 일 만들기</button>
+        <button type="button" id="todo-cancel-edit" class="ghost hidden">수정 취소</button>
+      </div>
+    </form>
+
+    <div class="toolbar">
+      <input type="search" id="todo-search" placeholder="할 일 검색..." />
+      <select id="todo-filter-status">
+        <option value="all">전체 상태</option>
+        <option value="active">진행 중</option>
+        <option value="done">완료</option>
+      </select>
+      <select id="todo-filter-priority">
+        <option value="all">전체 우선순위</option>
+        <option value="높음">높음</option>
+        <option value="중간">중간</option>
+        <option value="낮음">낮음</option>
+      </select>
+      <select id="todo-sort">
+        <option value="due_date.asc">마감일 빠른 순</option>
+        <option value="due_date.desc">마감일 늦은 순</option>
+        <option value="priority.custom">우선순위 높은 순</option>
+        <option value="created_at.desc">최근 등록 순</option>
+      </select>
+    </div>
+    <p class="sort-note" id="sort-note">정렬 기준: 마감일 빠른 순 (같으면 최근 등록 순)</p>
+
+    <table class="todo-table" id="todo-table">
+      <thead>
+        <tr>
+          <th>상태</th><th>제목</th><th>마감일</th><th>우선순위</th><th>태그</th><th>예상(분)</th><th>동작</th>
+        </tr>
+      </thead>
+      <tbody id="todo-tbody"></tbody>
+    </table>
+  </section>
+</main>
+
+<footer class="page-foot">
+  <p>plandusy-diary · Supabase 연동</p>
+</footer>
+
+<script type="module" src="todos.js"></script>
+</body>
+</html>

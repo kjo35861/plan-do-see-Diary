@@ -1,0 +1,101 @@
+{
+  "schema_version": "v2",
+  "database": "Supabase (Postgres)",
+  "timezone_rule": {
+    "storage": "모든 timestamptz 컬럼은 UTC로 저장",
+    "display": "화면에는 Asia/Seoul(KST)로 변환하여 표시",
+    "today_definition": "지연(overdue) 등 '오늘' 판정은 Asia/Seoul 기준 날짜(YYYY-MM-DD)로 계산"
+  },
+  "tables": {
+    "plans": {
+      "description": "사용자가 세운 계획",
+      "columns": {
+        "id": "uuid, pk",
+        "title": "text, not null",
+        "period_start": "date, not null",
+        "period_end": "date, not null",
+        "priority": "text, not null",
+        "success_criteria": "text, not null",
+        "estimated_minutes": "numeric, not null, default 0",
+        "created_at": "timestamptz, not null, default now()",
+        "is_deleted": "boolean, not null, default false (소프트 삭제)"
+      },
+      "relations": ["plan_revisions.plan_id -> plans.id", "todos.plan_id -> plans.id"]
+    },
+    "plan_revisions": {
+      "description": "계획 수정 시 '고치기 전' 스냅샷. plans UPDATE 전 트리거(trg_plan_before_update)가 자동 적재",
+      "columns": {
+        "id": "uuid, pk",
+        "plan_id": "uuid, fk -> plans.id",
+        "snapshot": "jsonb, not null (수정 전 plans 행 전체)",
+        "revised_at": "timestamptz, not null, default now()"
+      }
+    },
+    "todos": {
+      "description": "계획에 딸린 할 일",
+      "columns": {
+        "id": "uuid, pk",
+        "plan_id": "uuid, fk -> plans.id",
+        "title": "text, not null",
+        "due_date": "date, nullable",
+        "priority": "text, not null",
+        "tags": "text[], not null, default {}",
+        "estimated_minutes": "numeric, not null, default 0",
+        "status": "text, not null, default 'active' ('active' | 'done')",
+        "completed_at": "timestamptz, nullable",
+        "is_deleted": "boolean, not null, default false (소프트 삭제)",
+        "created_at": "timestamptz, not null, default now()",
+        "updated_at": "timestamptz, not null, default now()"
+      },
+      "relations": ["execution_logs.todo_id -> todos.id", "completion_events.todo_id -> todos.id"]
+    },
+    "execution_logs": {
+      "description": "실제로 한 일 기록 (계획 원본 값을 덮어쓰지 않음, 별도 적재)",
+      "columns": {
+        "id": "uuid, pk",
+        "todo_id": "uuid, fk -> todos.id",
+        "started_at": "timestamptz, not null",
+        "ended_at": "timestamptz, not null",
+        "actual_minutes": "numeric, not null",
+        "blocker_reason": "text, nullable",
+        "created_at": "timestamptz, not null, default now()"
+      }
+    },
+    "completion_events": {
+      "description": "완료 처리 이벤트 로그. fn_complete_todo() RPC가 status 전이를 서버에서 행 잠금 후 확인해 성공한 경우에만 1건 적재 -> 연타해도 중복 없음",
+      "columns": {
+        "id": "uuid, pk",
+        "todo_id": "uuid, fk -> todos.id",
+        "created_at": "timestamptz, not null, default now()"
+      }
+    },
+    "carryover_notes": {
+      "description": "돌아보기에서 다음 계획으로 넘기는 메모",
+      "columns": {
+        "id": "uuid, pk",
+        "source_plan_id": "uuid, fk -> plans.id, nullable",
+        "note": "text, not null",
+        "applied_to_plan_id": "uuid, fk -> plans.id, nullable (반영된 새 계획)",
+        "created_at": "timestamptz, not null, default now()"
+      }
+    }
+  },
+  "aggregation_rules": {
+    "planned_count": "해당 plan_id의 is_deleted=false todos 수 (T06-C28)",
+    "done_count": "그중 status='done' 수 (T06-C29)",
+    "overdue_count": "status != 'done' AND due_date < 오늘(KST). 완료된 항목은 지연으로 중복 집계하지 않음 (T06-C30)",
+    "blocked_count": "execution_logs.blocker_reason이 비어있지 않은 로그가 하나라도 연결된 todo 수 (T06-C31)",
+    "estimated_total": "대상 todos.estimated_minutes 합",
+    "actual_total": "대상 todos에 연결된 execution_logs.actual_minutes 합",
+    "diff": "actual_total - estimated_total, 데이터 없으면 0 (T06-C32)"
+  },
+  "completion_idempotency_rule": {
+    "mechanism": "fn_complete_todo(todo_id) Postgres 함수가 SELECT ... FOR UPDATE로 행을 잠근 뒤 status가 'active'일 때만 status를 'done'으로 바꾸고 completion_events에 1건 insert. 이미 'done'이면 아무 것도 하지 않음",
+    "verifies": "T06-C21, T06-C22"
+  },
+  "security": {
+    "auth": "없음 (로그인 미구현, 링크를 아는 사람은 열람 가능)",
+    "rls": "모든 테이블 RLS 활성화. publishable key로 select/insert/update만 허용, delete 정책 없음(하드 삭제 불가, is_deleted로만 삭제 처리)",
+    "keys": "클라이언트에는 publishable key만 사용. secret key는 어디에도 포함하지 않음"
+  }
+}

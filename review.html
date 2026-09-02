@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>플랜두씨 다이어리 — 돌아보기</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="notice-bar">
+  지금은 로그인이 없어 링크를 아는 사람은 누구나 볼 수 있습니다. 남이 봐도 괜찮은 내용만 넣으세요.
+</div>
+
+<header class="page-head">
+  <h1>돌아보기</h1>
+  <p class="sub">예상과 실제의 차이를 근거 기록과 함께 보고, 고칠 점을 다음 계획으로 넘깁니다</p>
+</header>
+
+<nav class="nav-bar">
+  <a href="index.html">계획</a>
+  <a href="todos.html">할 일</a>
+  <a href="logs.html">실행 기록</a>
+  <a href="review.html" class="active">돌아보기</a>
+  <a href="export.html">내보내기</a>
+</nav>
+
+<main>
+  <section class="card" id="section-review">
+    <div class="row">
+      <label>대상 계획
+        <select id="review-plan-select"></select>
+      </label>
+      <button type="button" id="review-run-btn">집계 계산</button>
+    </div>
+
+    <div class="stat-grid" id="stat-grid">
+      <button class="stat" data-key="planned" type="button"><span class="stat-num" id="stat-planned">-</span><span class="stat-label">계획 수(할 일)</span></button>
+      <button class="stat" data-key="done" type="button"><span class="stat-num" id="stat-done">-</span><span class="stat-label">완료 수</span></button>
+      <button class="stat" data-key="overdue" type="button"><span class="stat-num" id="stat-overdue">-</span><span class="stat-label">지연 수</span></button>
+      <button class="stat" data-key="blocked" type="button"><span class="stat-num" id="stat-blocked">-</span><span class="stat-label">막힘 수</span></button>
+      <div class="stat static"><span class="stat-num" id="stat-estimated">-</span><span class="stat-label">예상 시간(분)</span></div>
+      <div class="stat static"><span class="stat-num" id="stat-actual">-</span><span class="stat-label">실제 시간(분)</span></div>
+      <div class="stat static"><span class="stat-num" id="stat-diff">-</span><span class="stat-label">차이(실제-예상)</span></div>
+    </div>
+
+    <div id="drilldown" class="drilldown hidden">
+      <h3 id="drilldown-title"></h3>
+      <ul id="drilldown-list"></ul>
+    </div>
+
+    <form id="carryover-form" class="form-grid">
+      <label>다음 계획으로 넘길 한 줄 <input type="text" id="carryover-note" required /></label>
+      <div class="form-actions"><button type="submit">다음 계획으로 넘기기</button></div>
+    </form>
+    <p class="hint">저장한 메모는 "계획" 화면에서 새 계획을 만들 때 성공 기준 앞에 자동으로 붙습니다.</p>
+  </section>
+</main>
+
+<footer class="page-foot">
+  <p>plandusy-diary · Supabase 연동</p>
+</footer>
+
+<script type="module" src="review.js"></script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>플랜두씨 다이어리 — 계획</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="notice-bar">
+  지금은 로그인이 없어 링크를 아는 사람은 누구나 볼 수 있습니다. 남이 봐도 괜찮은 내용만 넣으세요.
+</div>
+
+<header class="page-head">
+  <h1>플랜두씨 다이어리</h1>
+  <p class="sub">계획(Plan) → 실제로 한 일(Do) → 돌아보기(See)</p>
+</header>
+
+<nav class="nav-bar">
+  <a href="index.html" class="active">계획</a>
+  <a href="todos.html">할 일</a>
+  <a href="logs.html">실행 기록</a>
+  <a href="review.html">돌아보기</a>
+  <a href="export.html">내보내기</a>
+</nav>
+
+<main>
+  <section class="card" id="section-plans">
+    <h2>계획 만들고 관리하기</h2>
+    <p class="hint">계획 목록에서 "이 계획 선택"을 누르면 할 일 · 실행 기록 화면에서 그 계획이 이어서 열립니다.</p>
+
+    <form id="plan-form" class="form-grid">
+      <input type="hidden" id="plan-edit-id" />
+      <label>제목 <input type="text" id="plan-title" required /></label>
+      <label>시작일 <input type="date" id="plan-period-start" required /></label>
+      <label>종료일 <input type="date" id="plan-period-end" required /></label>
+      <label>우선순위
+        <select id="plan-priority">
+          <option value="높음">높음</option>
+          <option value="중간" selected>중간</option>
+          <option value="낮음">낮음</option>
+        </select>
+      </label>
+      <label>성공 기준 <input type="text" id="plan-success" required /></label>
+      <label>예상 시간(분) <input type="number" id="plan-estimate" min="0" required /></label>
+      <div class="form-actions">
+        <button type="submit" id="plan-submit-btn">계획 만들기</button>
+        <button type="button" id="plan-cancel-edit" class="ghost hidden">수정 취소</button>
+      </div>
+    </form>
+
+    <div id="carryover-banner" class="carryover-banner hidden"></div>
+
+    <ul id="plan-list" class="plan-list"></ul>
+  </section>
+</main>
+
+<footer class="page-foot">
+  <p>plandusy-diary · Supabase 연동</p>
+</footer>
+
+<script type="module" src="plans.js"></script>
+</body>
+</html>

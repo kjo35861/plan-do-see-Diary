@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>플랜두씨 다이어리 — 실행 기록</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="notice-bar">
+  지금은 로그인이 없어 링크를 아는 사람은 누구나 볼 수 있습니다. 남이 봐도 괜찮은 내용만 넣으세요.
+</div>
+
+<header class="page-head">
+  <h1>실제로 한 일 기록</h1>
+  <p class="sub">계획과 별개로, 실제로 언제 시작해서 얼마나 걸렸고 어디서 막혔는지 남깁니다</p>
+</header>
+
+<nav class="nav-bar">
+  <a href="index.html">계획</a>
+  <a href="todos.html">할 일</a>
+  <a href="logs.html" class="active">실행 기록</a>
+  <a href="review.html">돌아보기</a>
+  <a href="export.html">내보내기</a>
+</nav>
+
+<div class="plan-badge" id="plan-badge"></div>
+
+<main>
+  <section class="card" id="section-logs">
+    <div class="row">
+      <label>대상 할 일
+        <select id="log-todo-select"></select>
+      </label>
+    </div>
+
+    <form id="log-form" class="form-grid">
+      <label>시작 시각 <input type="datetime-local" id="log-start" required /></label>
+      <label>끝난 시각 <input type="datetime-local" id="log-end" required /></label>
+      <label>실제 걸린 시간(분) <input type="number" id="log-actual" min="0" required /></label>
+      <label>막혔던 이유(없으면 비워둠) <input type="text" id="log-blocker" /></label>
+      <div class="form-actions">
+        <button type="submit">실행 기록 저장</button>
+      </div>
+    </form>
+
+    <div class="dedupe-test">
+      <button type="button" id="dedupe-test-btn">완료 버튼 연타 테스트 (선택한 할 일에 대해 2연속 완료 호출)</button>
+      <span id="dedupe-result"></span>
+    </div>
+
+    <table class="log-table" id="log-table">
+      <thead><tr><th>시작</th><th>종료</th><th>실제(분)</th><th>막힌 이유</th></tr></thead>
+      <tbody id="log-tbody"></tbody>
+    </table>
+  </section>
+</main>
+
+<footer class="page-foot">
+  <p>plandusy-diary · Supabase 연동</p>
+</footer>
+
+<script type="module" src="logs.js"></script>
+</body>
+</html>
