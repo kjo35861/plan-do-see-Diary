@@ -1,65 +1,268 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>플랜두씨 다이어리 — 계획</title>
-<link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plan Do See Diary — 계획한 나와 실제의 나</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="notice-bar">
-  지금은 로그인이 없어 링크를 아는 사람은 누구나 볼 수 있습니다. 남이 봐도 괜찮은 내용만 넣으세요.
-</div>
+<!-- ===================== 로그인/가입 화면 (첫 화면) ===================== -->
+<section id="auth-screen" class="auth-screen">
+  <div class="auth-card">
+    <h1 class="auth-title">Plan Do See Diary</h1>
+    <p class="auth-tagline">계획한 나 <span class="vs">＋</span> 실제의 나, 이제 나만 봅니다</p>
 
-<header class="page-head">
-  <h1>플랜두씨 다이어리</h1>
-  <p class="sub">계획(Plan) → 실제로 한 일(Do) → 돌아보기(See)</p>
+    <div class="auth-tabs">
+      <button id="auth-tab-login" class="auth-tab is-active">로그인</button>
+      <button id="auth-tab-signup" class="auth-tab">가입</button>
+    </div>
+
+    <form id="auth-form" class="auth-form">
+      <div class="field">
+        <label for="auth-email">이메일</label>
+        <input type="email" id="auth-email" required autocomplete="username">
+      </div>
+      <div class="field">
+        <label for="auth-password">비밀번호</label>
+        <input type="password" id="auth-password" required minlength="6" autocomplete="current-password">
+      </div>
+      <button type="submit" id="auth-submit" class="btn btn-primary auth-submit">로그인</button>
+      <p id="auth-msg" class="auth-msg" role="status"></p>
+    </form>
+  </div>
+</section>
+
+<!-- ===================== 앱 화면 (로그인 후에만 보임) ===================== -->
+<div id="app-screen" class="is-hidden">
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="masthead-top">
+      <div>
+        <h1>Plan Do See Diary</h1>
+        <p class="tagline">계획한 나 <span class="vs">＋</span> 실제의 나, 같은 줄에 나란히</p>
+      </div>
+      <div class="account-box">
+        <span id="account-email" class="account-email">—</span>
+        <span id="session-expiry" class="session-expiry"></span>
+        <button id="logout-btn" class="btn btn-ghost btn-small">로그아웃</button>
+      </div>
+    </div>
+  </div>
 </header>
 
-<nav class="nav-bar">
-  <a href="index.html" class="active">계획</a>
-  <a href="todos.html">할 일</a>
-  <a href="logs.html">실행 기록</a>
-  <a href="review.html">돌아보기</a>
-  <a href="export.html">내보내기</a>
+<nav class="tabbar" role="tablist" aria-label="다이어리 메뉴">
+  <button class="tab-btn is-active" data-tab="records" role="tab" aria-selected="true">기록</button>
+  <button class="tab-btn" data-tab="summary" role="tab" aria-selected="false">주간 요약</button>
+  <button class="tab-btn" data-tab="data" role="tab" aria-selected="false">데이터 관리</button>
 </nav>
 
-<main>
-  <section class="card" id="section-plans">
-    <h2>계획 만들고 관리하기</h2>
-    <p class="hint">계획 목록에서 "이 계획 선택"을 누르면 할 일 · 실행 기록 화면에서 그 계획이 이어서 열립니다.</p>
+<main class="page">
 
-    <form id="plan-form" class="form-grid">
-      <input type="hidden" id="plan-edit-id" />
-      <label>제목 <input type="text" id="plan-title" required /></label>
-      <label>시작일 <input type="date" id="plan-period-start" required /></label>
-      <label>종료일 <input type="date" id="plan-period-end" required /></label>
-      <label>우선순위
-        <select id="plan-priority">
-          <option value="높음">높음</option>
-          <option value="중간" selected>중간</option>
-          <option value="낮음">낮음</option>
+  <!-- ===================== 기록 탭 ===================== -->
+  <section id="tab-records" class="tab-panel is-active">
+
+    <form id="record-form" class="record-form">
+      <input type="hidden" id="record-id">
+
+      <div class="field">
+        <label for="f-date">날짜</label>
+        <input type="date" id="f-date" required>
+      </div>
+
+      <div class="field">
+        <label for="f-tz">기준 시간대</label>
+        <select id="f-tz">
+          <option value="Asia/Seoul" selected>Asia/Seoul (KST)</option>
         </select>
-      </label>
-      <label>성공 기준 <input type="text" id="plan-success" required /></label>
-      <label>예상 시간(분) <input type="number" id="plan-estimate" min="0" required /></label>
-      <div class="form-actions">
-        <button type="submit" id="plan-submit-btn">계획 만들기</button>
-        <button type="button" id="plan-cancel-edit" class="ghost hidden">수정 취소</button>
+      </div>
+
+      <div class="field field-wide">
+        <label for="f-item">항목</label>
+        <input type="text" id="f-item" placeholder="예: 수면 시간, 코딩 연습, 물 섭취량" required>
+      </div>
+
+      <div class="field">
+        <label for="f-value">값</label>
+        <input type="number" id="f-value" step="any" placeholder="예: 6.5" required>
+      </div>
+
+      <div class="field">
+        <label for="f-unit">단위</label>
+        <input type="text" id="f-unit" placeholder="예: 시간, 회, L" required>
+      </div>
+
+      <div class="field field-wide">
+        <label for="f-tag">태그 <span class="optional">(선택)</span></label>
+        <input type="text" id="f-tag" placeholder="예: 계획, 실제, 학원">
+      </div>
+
+      <div class="field field-full">
+        <label for="f-memo">메모 <span class="optional">(선택)</span></label>
+        <textarea id="f-memo" rows="2" placeholder="오늘 이 기록에 대해 남기고 싶은 한 줄"></textarea>
+      </div>
+
+      <div class="field field-full form-actions">
+        <button type="submit" id="submit-btn" class="btn btn-primary">기록 추가</button>
+        <button type="button" id="cancel-edit-btn" class="btn btn-ghost is-hidden">수정 취소</button>
+        <span id="form-msg" class="form-msg" role="status"></span>
       </div>
     </form>
 
-    <div id="carryover-banner" class="carryover-banner hidden"></div>
+    <div class="section-head">
+      <h2>내 기록 <span id="record-count" class="count-pill">0건</span></h2>
+      <button id="seed-btn" class="btn btn-ghost btn-small">가상 기록 5건 채우기</button>
+    </div>
 
-    <ul id="plan-list" class="plan-list"></ul>
+    <div class="table-wrap">
+      <table class="record-table">
+        <thead>
+          <tr>
+            <th>날짜</th>
+            <th>항목</th>
+            <th>값</th>
+            <th>단위</th>
+            <th>태그</th>
+            <th>메모</th>
+            <th class="col-actions">관리</th>
+          </tr>
+        </thead>
+        <tbody id="record-tbody">
+          <tr class="empty-row"><td colspan="7">불러오는 중...</td></tr>
+        </tbody>
+      </table>
+    </div>
   </section>
+
+  <!-- ===================== 주간 요약 탭 ===================== -->
+  <section id="tab-summary" class="tab-panel">
+
+    <div class="week-nav">
+      <button id="week-prev" class="btn btn-ghost" aria-label="이전 주">◀ 이전 주</button>
+      <div class="week-range" id="week-range">—</div>
+      <button id="week-next" class="btn btn-ghost" aria-label="다음 주">다음 주 ▶</button>
+      <button id="week-today" class="btn btn-ghost btn-small">이번 주로</button>
+    </div>
+
+    <div class="section-head">
+      <h2>항목별 합계 (월요일 00:00 ~ 일요일 23:59, KST)</h2>
+    </div>
+
+    <div class="table-wrap">
+      <table class="record-table">
+        <thead>
+          <tr>
+            <th>항목</th>
+            <th>합계</th>
+            <th>단위</th>
+            <th>기록 수</th>
+          </tr>
+        </thead>
+        <tbody id="summary-tbody">
+          <tr class="empty-row"><td colspan="4">이 주에 유효한 기록이 없습니다.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-head">
+      <h2>이 주에서 제외된 기록 <span id="excluded-count" class="count-pill count-pill-warn">0건</span></h2>
+    </div>
+    <p class="hint">날짜를 해석할 수 없거나 값이 숫자가 아닌 기록은 집계에서 자동으로 제외됩니다.</p>
+    <div class="table-wrap">
+      <table class="record-table">
+        <thead>
+          <tr>
+            <th>날짜(원본)</th>
+            <th>항목</th>
+            <th>값(원본)</th>
+            <th>제외 사유</th>
+          </tr>
+        </thead>
+        <tbody id="excluded-tbody">
+          <tr class="empty-row"><td colspan="4">제외된 기록이 없습니다.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-head"><h2>규칙 변경 기록</h2></div>
+    <p class="hint">2일차 기록 뒤, 3일차 기록 앞에 계획 규칙을 하나 바꾸고 그 이유를 남깁니다.</p>
+    <div class="table-wrap">
+      <table class="record-table">
+        <thead><tr><th>바꾼 시각</th><th>바꾼 내용</th><th>이유</th></tr></thead>
+        <tbody id="rulechange-tbody">
+          <tr class="empty-row"><td colspan="3">아직 규칙 변경 기록이 없습니다.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <form id="rulechange-form" class="record-form rulechange-form">
+      <div class="field field-wide">
+        <label for="rc-content">바꾼 내용</label>
+        <input type="text" id="rc-content" placeholder="예: 하루 목표 코딩 시간을 1시간→1.5시간으로">
+      </div>
+      <div class="field field-full">
+        <label for="rc-reason">바꾼 이유</label>
+        <input type="text" id="rc-reason" placeholder="예: 1~2일차엔 늘 목표를 넘겨서 기준을 올림">
+      </div>
+      <div class="field field-full form-actions">
+        <button type="submit" class="btn btn-primary">규칙 변경 기록 추가</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ===================== 데이터 관리 탭 ===================== -->
+  <section id="tab-data" class="tab-panel">
+
+    <div class="section-head"><h2>현재 자료 상태</h2></div>
+    <div class="status-grid">
+      <div class="status-card">
+        <span class="status-label">로그인 계정</span>
+        <span class="status-value" id="status-account">—</span>
+      </div>
+      <div class="status-card">
+        <span class="status-label">총 기록 수</span>
+        <span class="status-value" id="status-count">0건</span>
+      </div>
+      <div class="status-card">
+        <span class="status-label">세션 만료</span>
+        <span class="status-value" id="status-expiry">—</span>
+      </div>
+    </div>
+
+    <div class="section-head"><h2>내보내기</h2></div>
+    <div class="data-actions">
+      <button id="export-btn" class="btn btn-primary">JSON으로 내보내기</button>
+    </div>
+    <div id="data-msg" class="data-msg" role="status"></div>
+
+    <div class="section-head"><h2>T06 로컬 자료를 내 계정으로 옮기기</h2></div>
+    <p class="hint">6번 과제(플랜두씨 다이어리 1)에서 내보낸 JSON 파일을 가져오면, 그 안의 기록이 현재 로그인한 내 계정으로 들어갑니다.</p>
+    <div class="data-actions">
+      <label class="btn btn-ghost file-label">
+        T06 내보내기 파일 가져오기
+        <input type="file" id="import-file" accept="application/json,.json" class="visually-hidden">
+      </label>
+    </div>
+
+    <div class="section-head"><h2>계정 삭제</h2></div>
+    <p class="hint">계정을 삭제하면 이 계정에 속한 모든 기록도 함께 삭제됩니다. 되돌릴 수 없습니다.</p>
+    <div class="data-actions">
+      <button id="delete-account-btn" class="btn btn-danger">계정 삭제</button>
+    </div>
+  </section>
+
 </main>
 
-<footer class="page-foot">
-  <p>plandusy-diary · Supabase 연동</p>
+<footer class="site-footer">
+  <p>기록은 로그인한 계정 소유로 Supabase(Postgres)에 저장되며, 행 단위 보안 정책(RLS)으로 본인 계정에서만 접근됩니다.</p>
 </footer>
 
-<script type="module" src="plans.js"></script>
+</div><!-- /#app-screen -->
+
+<script type="module" src="script.js"></script>
 </body>
 </html>
