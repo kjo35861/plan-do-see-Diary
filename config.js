@@ -9,4 +9,4 @@
 // RLS를 무시하므로 절대 프런트엔드 코드에 넣지 않는다.
 
 export const SUPABASE_URL = 'https://YOUR-PROJECT-REF.supabase.co';
-export const SUPABASE_ANON_KEY = 'YOUR-ANON-PUBLIC-KEY';
+export const SUPABASE_ANON_KEY = 'sb_publishable_bNq1d7KIzzXqi8zGlDvqsw_ZxtmZoM4';
