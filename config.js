@@ -8,5 +8,5 @@
 // 반드시 넣지 말아야 하는 것: service_role 키(관리자 키). 그 키는
 // RLS를 무시하므로 절대 프런트엔드 코드에 넣지 않는다.
 
-export const SUPABASE_URL = 'https://YOUR-PROJECT-REF.supabase.co';
+export const SUPABASE_URL = 'https://eteunidypthhlwvenyos.supabase.co';
 export const SUPABASE_ANON_KEY = 'sb_publishable_bNq1d7KIzzXqi8zGlDvqsw_ZxtmZoM4';
