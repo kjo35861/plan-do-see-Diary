@@ -63,6 +63,18 @@ export function onAuthChange(callback) {
  *
  *  records 테이블은 user_id에 ON DELETE CASCADE가 걸려 있어 함께 삭제된다.
  */
+/** 비밀번호 변경 (T07-C114 후반부: "비밀번호를 바꾸면 이전 값이 안 통한다").
+ *  1) 새 비밀번호로 갱신
+ *  2) 이 기기(현재 세션)만 남기고 다른 기기·브라우저의 세션을 전부 무효화(scope:'others')
+ *     — supabase-schema.sql의 session_is_valid()와 짝을 이뤄, 다른 곳에 남아있던
+ *       이전 액세스 토큰은 자연 만료를 기다리지 않고 다음 요청부터 즉시 거절된다. */
+export async function changePassword(newPassword) {
+  const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+  if (updateError) throw updateError;
+  const { error: signOutError } = await supabase.auth.signOut({ scope: 'others' });
+  if (signOutError) throw signOutError;
+}
+
 export async function deleteMyAccount() {
   const { error } = await supabase.rpc('delete_my_account');
   if (error) throw error;

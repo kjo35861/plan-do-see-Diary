@@ -382,6 +382,17 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .auth-msg.is-error{ color: var(--danger); }
 .auth-msg.is-ok{ color: var(--plan); }
 
+/* ===== 비밀번호 변경 폼 (데이터 관리 탭) ===== */
+.password-form{ display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; }
+.password-form input{
+  flex: 1 1 220px;
+  font-family: var(--sans);
+  font-size: 0.92rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.55rem 0.65rem;
+}
+
 /* ===== 로그인 후 상단 계정 영역 ===== */
 .masthead-top{
   display: flex;

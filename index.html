@@ -248,6 +248,14 @@
       </label>
     </div>
 
+    <div class="section-head"><h2>비밀번호 변경</h2></div>
+    <p class="hint">비밀번호를 바꾸면 이 기기의 세션은 그대로 유지되고, 다른 기기·브라우저에 남아있던 이전 로그인은 즉시 끊깁니다.</p>
+    <form id="password-form" class="data-actions password-form" autocomplete="off">
+      <input type="password" id="new-password" placeholder="새 비밀번호 (6자 이상)" autocomplete="new-password" required minlength="6">
+      <button type="submit" class="btn btn-primary">비밀번호 변경</button>
+    </form>
+    <div id="password-msg" class="data-msg" role="status"></div>
+
     <div class="section-head"><h2>계정 삭제</h2></div>
     <p class="hint">계정을 삭제하면 이 계정에 속한 모든 기록도 함께 삭제됩니다. 되돌릴 수 없습니다.</p>
     <div class="data-actions">

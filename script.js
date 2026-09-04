@@ -1,4 +1,4 @@
-import { supabase, signUp, signIn, signOut, getSession, onAuthChange, deleteMyAccount } from './auth.js';
+import { supabase, signUp, signIn, signOut, getSession, onAuthChange, deleteMyAccount, changePassword } from './auth.js';
 
 (() => {
   'use strict';
@@ -100,6 +100,23 @@ import { supabase, signUp, signIn, signOut, getSession, onAuthChange, deleteMyAc
 
   document.getElementById('logout-btn').addEventListener('click', async () => {
     await signOut();
+  });
+
+  document.getElementById('password-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const input = document.getElementById('new-password');
+    const newPassword = input.value;
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    try {
+      await changePassword(newPassword);
+      input.value = '';
+      setPasswordMsg('비밀번호를 변경했습니다. 이 기기는 로그인이 유지되고, 다른 기기의 로그인은 모두 끊겼습니다.', 'ok');
+    } catch (err) {
+      setPasswordMsg('비밀번호 변경 실패: ' + translateAuthError(err), 'error');
+    } finally {
+      submitBtn.disabled = false;
+    }
   });
 
   document.getElementById('delete-account-btn').addEventListener('click', async () => {
@@ -480,6 +497,12 @@ import { supabase, signUp, signIn, signOut, getSession, onAuthChange, deleteMyAc
   function setDataMsg(text, kind) {
     dataMsg.textContent = text;
     dataMsg.className = 'data-msg' + (kind ? ' is-' + kind : '');
+  }
+
+  const passwordMsg = document.getElementById('password-msg');
+  function setPasswordMsg(text, kind) {
+    passwordMsg.textContent = text;
+    passwordMsg.className = 'data-msg' + (kind ? ' is-' + kind : '');
   }
 
   function renderDataStatus() {
