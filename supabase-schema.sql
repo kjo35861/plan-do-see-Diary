@@ -1,6 +1,8 @@
 -- ============================================================
 -- Plan-Do-See Diary — Supabase 스키마 (T07 카드 4 핵심)
--- Supabase 대시보드 → SQL Editor에 그대로 붙여넣어 실행한다.
+-- Supabase 대시보드 → SQL Editor에 처음부터 끝까지 그대로 붙여넣어
+-- 실행한다. 이미 한 번 실행한 프로젝트에 다시 실행해도 안전하다
+-- (테이블은 if not exists, 정책은 drop policy if exists 후 재생성).
 -- ============================================================
 
 -- 1) 기록 테이블
@@ -43,6 +45,7 @@ alter table public.records enable row level security;
 --
 -- auth.sessions는 기본적으로 supabase_auth_admin만 읽을 수 있어
 -- SECURITY DEFINER 함수로 감싸 authenticated 역할에만 실행 권한을 준다.
+-- (create or replace이므로 재실행해도 안전)
 create or replace function public.session_is_valid()
 returns boolean
 language sql
@@ -62,23 +65,26 @@ grant execute on function public.session_is_valid() to authenticated;
 -- 3) 소유자만 읽기 (목록 조회에도 동일하게 적용됨 — 카드4의 핵심 요구사항)
 --    + session_is_valid(): 로그아웃(또는 비밀번호 변경으로 인한 다른 세션 강제
 --    로그아웃)된 뒤에는 액세스 토큰이 자연 만료 전이라도 즉시 거절되게 한다.
---    (T07-C114 — 아래 10번 항목 참고)
+drop policy if exists "select own records" on public.records;
 create policy "select own records"
   on public.records for select
   using (auth.uid() = user_id and public.session_is_valid());
 
 -- 4) 소유자로만 생성 가능 (user_id를 다른 사람 것으로 보내도 거절됨)
+drop policy if exists "insert own records" on public.records;
 create policy "insert own records"
   on public.records for insert
   with check (auth.uid() = user_id and public.session_is_valid());
 
 -- 5) 소유자만 수정 가능 (다른 사람 행을 대상으로 한 UPDATE는 영향 0건)
+drop policy if exists "update own records" on public.records;
 create policy "update own records"
   on public.records for update
   using (auth.uid() = user_id and public.session_is_valid())
   with check (auth.uid() = user_id and public.session_is_valid());
 
 -- 6) 소유자만 삭제 가능 (다른 사람 행을 대상으로 한 DELETE는 영향 0건)
+drop policy if exists "delete own records" on public.records;
 create policy "delete own records"
   on public.records for delete
   using (auth.uid() = user_id and public.session_is_valid());
@@ -112,10 +118,12 @@ create table if not exists public.rule_changes (
 
 alter table public.rule_changes enable row level security;
 
+drop policy if exists "select own rule changes" on public.rule_changes;
 create policy "select own rule changes"
   on public.rule_changes for select
   using (auth.uid() = user_id and public.session_is_valid());
 
+drop policy if exists "insert own rule changes" on public.rule_changes;
 create policy "insert own rule changes"
   on public.rule_changes for insert
   with check (auth.uid() = user_id and public.session_is_valid());
@@ -139,62 +147,10 @@ $$;
 revoke all on function public.delete_my_account() from public;
 grant execute on function public.delete_my_account() to authenticated;
 
-
 -- ============================================================
--- 10) 마이그레이션 — 이미 이 스키마를 한 번 실행해 배포된 프로젝트라면
---     위 1~9번을 처음부터 다시 실행하지 말고, 아래 블록만 SQL Editor에
---     붙여넣어 실행한다 (policy already exists 오류 방지를 위해
---     drop policy if exists 후 재생성).
+-- 확인: 이 파일 실행 후 verify.sh (2)를 다시 돌리면, 로그아웃 뒤
+-- 같은 토큰으로 재요청했을 때 기존 자료가 그대로 오던 것이
+-- 200 OK + 빈 배열([])로 바뀐다 — RLS가 세션이 이미 끊어졌다고
+-- 판단해 행을 하나도 못 찾은 것처럼 응답하는 것(T07-C121과 동일한
+-- "존재를 감추는" 방식). 이 변화가 T07-C114의 실제 근거가 된다.
 -- ============================================================
-
-create or replace function public.session_is_valid()
-returns boolean
-language sql
-stable
-security definer
-set search_path = auth, pg_temp
-as $$
-  select exists (
-    select 1 from auth.sessions s
-    where s.id = (auth.jwt() ->> 'session_id')::uuid
-  );
-$$;
-
-revoke all on function public.session_is_valid() from public;
-grant execute on function public.session_is_valid() to authenticated;
-
-drop policy if exists "select own records" on public.records;
-create policy "select own records"
-  on public.records for select
-  using (auth.uid() = user_id and public.session_is_valid());
-
-drop policy if exists "insert own records" on public.records;
-create policy "insert own records"
-  on public.records for insert
-  with check (auth.uid() = user_id and public.session_is_valid());
-
-drop policy if exists "update own records" on public.records;
-create policy "update own records"
-  on public.records for update
-  using (auth.uid() = user_id and public.session_is_valid())
-  with check (auth.uid() = user_id and public.session_is_valid());
-
-drop policy if exists "delete own records" on public.records;
-create policy "delete own records"
-  on public.records for delete
-  using (auth.uid() = user_id and public.session_is_valid());
-
-drop policy if exists "select own rule changes" on public.rule_changes;
-create policy "select own rule changes"
-  on public.rule_changes for select
-  using (auth.uid() = user_id and public.session_is_valid());
-
-drop policy if exists "insert own rule changes" on public.rule_changes;
-create policy "insert own rule changes"
-  on public.rule_changes for insert
-  with check (auth.uid() = user_id and public.session_is_valid());
-
--- 확인: 위 마이그레이션 실행 후 verify.sh (2)를 다시 돌리면 로그아웃
--- 뒤 같은 토큰 재요청이 200+기존자료가 아니라, RLS가 행을 하나도
--- 못 찾은 것처럼 200 OK + 빈 배열([])로 바뀐다(카드4와 동일한
--- "존재를 감추는" 방식의 거절 — T07-C121 참고).
